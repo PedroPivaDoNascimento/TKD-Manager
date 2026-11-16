@@ -1,0 +1,62 @@
+Dependências
+
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+Next.js
+
+/.next/
+/out/
+
+Produção / Build
+
+/build
+/dist
+*.tsbuildinfo
+next-env.d.ts
+
+Variáveis de Ambiente (CRÍTICO - Nunca subir senhas ou chaves JWT)
+
+.env
+.env*.local
+.env.development
+.env.production
+.env.test
+
+Prisma & Banco de Dados
+
+/prisma/.db
+/prisma/.db-journal
+/prisma/migrations/dev.db*
+
+Docker (Volumes locais de banco de dados)
+
+/postgres-data/
+/pgdata/
+
+Logs e Debug
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+Testes e Coverage
+
+/coverage
+
+Arquivos de Sistema Operacional & IDEs
+
+.DS_Store
+Thumbs.db
+.pem
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
