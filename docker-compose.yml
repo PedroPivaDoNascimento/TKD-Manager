@@ -1,0 +1,51 @@
+# =============================================================================
+# TKD Manager - Orquestracao Docker (Dev + Producao)
+# =============================================================================
+#  Modo desenvolvimento (apenas o banco):
+#    docker compose up -d postgres
+#
+#  Modo producao (aplicacao Next.js standalone + PostgreSQL):
+#    docker compose --profile production up -d --build
+# =============================================================================
+
+services:
+  # Servico PostgreSQL usado em DEV e como banco da aplicacao em PRODUCOES
+  postgres:
+    image: postgres:16-alpine
+    container_name: tkd-manager-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tkd
+      POSTGRES_PASSWORD: tkd_secret
+      POSTGRES_DB: tkd_manager
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U tkd -d tkd_manager']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Aplicacao Next.js em modo producao (Dockerfile multi-stage, output standalone)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tkd-manager-app
+    profiles: ['production']
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://tkd:tkd_secret@postgres:5432/tkd_manager?schema=public
+      JWT_SECRET: ${JWT_SECRET:-troque-este-segredo-em-producao}
+      SEED_DEFAULT_PASSWORD: ${SEED_DEFAULT_PASSWORD:-miguetti123}
+      NODE_ENV: production
+    ports:
+      - '3000:3000'
+
+volumes:
+  pgdata:
