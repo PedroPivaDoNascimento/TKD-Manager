@@ -6,24 +6,24 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🥋 Iniciando seed do TKD Manager (Centro de Treinamento Miguetti Team)...');
 
-  const masterEmail = process.env.MASTER_EMAIL || 'professor@miguettiteam.com';
-  const masterPassword = process.env.MASTER_PASSWORD || process.env.SEED_DEFAULT_PASSWORD || 'miguetti123';
+  const masterEmail = process.env.MASTER_EMAIL || "";
+  const masterPassword = process.env.MASTER_PASSWORD || process.env.SEED_DEFAULT_PASSWORD || '';
   const senhaHash = await bcrypt.hash(masterPassword, 10);
 
   // 1. Criar Professor Mestre (Sabomim - Usuário Administrativo Principal)
   const professorPrincipal = await prisma.professor.upsert({
     where: { email: masterEmail },
     update: {
-      nome: 'Mestre Alexandre Miguetti',
+      nome: 'Teste professor',
       senhaHash,
-      graduacao: 'Faixa Preta 5º Dan',
+      graduacao: 'Faixa Preta 3º Dan',
       ativo: true,
     },
     create: {
-      nome: 'Mestre Alexandre Miguetti',
+      nome: 'Teste professor',
       email: masterEmail,
       senhaHash,
-      graduacao: 'Faixa Preta 5º Dan',
+      graduacao: 'Faixa Preta 3º Dan',
       ativo: true,
     },
   });
@@ -192,19 +192,19 @@ async function main() {
       {
         titulo: 'Lembrete Amigável',
         corpo:
-          'Olá, {destinatario}! Tudo bem? Passando para lembrar da mensalidade do(a) aluno(a) {nome_aluno} no valor de {valor} com vencimento para {vencimento} (ref. {competencia}). Centro de Treinamento Miguetti Team agradece! OSS! 🥋',
+          'Olá, {destinatario}! Tudo bem? Passando para lembrar da mensalidade do(a) aluno(a) {nome_aluno} no valor de {valor} com vencimento para {vencimento} (ref. {competencia}). Centro de Treinamento Miguetti Team agradece!',
         isDefault: true,
       },
       {
         titulo: 'Cobrança no Vencimento',
         corpo:
-          'Olá, {destinatario}! Mensagem do Centro de Treinamento Miguetti Team. Lembramos que a mensalidade do aluno(a) {nome_aluno} ({valor}) referente a {competencia} vence em {vencimento}. Fique em dia com os treinos! Dúvidas estamos à disposição. OSS! 🥋',
+          'Olá, {destinatario}! Mensagem do Centro de Treinamento Miguetti Team. Lembramos que a mensalidade do aluno(a) {nome_aluno} ({valor}) referente a {competencia} vence em {vencimento}. Fique em dia com os treinos! Dúvidas estamos à disposição.',
         isDefault: false,
       },
       {
         titulo: 'Aviso de Vencimento / Urgente',
         corpo:
-          'Olá, {destinatario}! Constatamos que a mensalidade do(a) aluno(a) {nome_aluno} ref. {competencia} ({valor}) venceu em {vencimento}. Pedimos a gentileza de regularizar para mantermos a frequência normal dos treinos. Caso já tenha realizado, favor desconsiderar. OSS! 🥋',
+          'Olá, {destinatario}! Constatamos que a mensalidade do(a) aluno(a) {nome_aluno} ref. {competencia} ({valor}) venceu em {vencimento}. Pedimos a gentileza de regularizar para mantermos a frequência normal dos treinos. Caso já tenha realizado, favor desconsiderar.',
         isDefault: false,
       },
     ],

@@ -49,11 +49,13 @@ src/
 
 ### Pré-requisitos
 - **Node.js** 18+ (recomendado Node 20 LTS) e **npm**
-- **Docker** e **Docker Compose**
+- **Neon CLI** (`npm i -g neon@latest`) para gerenciamento do banco na nuvem **OU** **Docker** para banco local
 
 ---
 
-### 1️⃣ Modo Desenvolvedor (Local com Node.js + Banco no Docker)
+### 1️⃣ Modo com Banco Neon Serverless (Recomendado)
+
+O projeto está configurado nativamente com **Neon Postgres**. O Prisma utiliza pooler (`DATABASE_URL`) para as requisições web e conexão direta (`DATABASE_URL_UNPOOLED`) para migrações.
 
 1. **Clonar e instalar dependências:**
    ```bash
@@ -62,25 +64,20 @@ src/
    npm install
    ```
 
-2. **Configurar variáveis de ambiente:**
-   Copie o arquivo de exemplo:
+2. **Autenticar e puxar as variáveis do Neon:**
    ```bash
-   cp .env.example .env
+   neon login
+   neon env pull
    ```
-   *Assegure-se de que o `DATABASE_URL` aponta para `postgresql://tkd:tkd_secret@localhost:5432/tkd_manager?schema=public`.*
+   *Ou configure manualmente `.env` com `DATABASE_URL` (pooled) e `DATABASE_URL_UNPOOLED` (direta).*
 
-3. **Subir o banco PostgreSQL via Docker:**
+3. **Executar migrações e popular banco de dados (Seed):**
    ```bash
-   docker compose up -d postgres
-   ```
-
-4. **Executar migrações do Prisma e popular o banco (Seed):**
-   ```bash
-   npm run db:migrate
+   npm run db:deploy
    npm run db:seed
    ```
 
-5. **Iniciar o servidor de desenvolvimento:**
+4. **Iniciar o servidor de desenvolvimento:**
    ```bash
    npm run dev
    ```
@@ -88,7 +85,41 @@ src/
 
 ---
 
-### 2️⃣ Modo Produção (Container Completo com Docker Compose)
+### 2️⃣ Modo Desenvolvedor Local (Docker)
+
+Caso queira rodar um PostgreSQL local via Docker sem Neon:
+
+1. **Clonar e instalar dependências:**
+   ```bash
+   npm install
+   ```
+
+2. **Configurar variáveis de ambiente (`.env`):**
+   ```bash
+   cp .env.example .env
+   ```
+   Defina `DATABASE_URL` e `DATABASE_URL_UNPOOLED` apontando para o PostgreSQL local:
+   `postgresql://tkd:tkd_secret@localhost:5432/tkd_manager?schema=public`
+
+3. **Subir o banco PostgreSQL via Docker:**
+   ```bash
+   docker compose up -d postgres
+   ```
+
+4. **Executar migrações do Prisma e Seed:**
+   ```bash
+   npm run db:migrate
+   npm run db:seed
+   ```
+
+5. **Iniciar o servidor:**
+   ```bash
+   npm run dev
+   ```
+
+---
+
+### 3️⃣ Modo Produção (Container Completo com Docker Compose)
 
 Para rodar todo o ecossistema (App Next.js Standalone + Banco PostgreSQL) encapsulado em containers:
 
@@ -114,20 +145,6 @@ Para rodar todo o ecossistema (App Next.js Standalone + Banco PostgreSQL) encaps
 
 ---
 
-## 🔑 Credenciais Mestre do Sistema (.env & Seed)
-
-As credenciais do Professor Mestre são configuradas de forma centralizada nas variáveis de ambiente do arquivo `.env` e propagadas via seed (`npm run db:seed`):
-
-| Campo | Variável `.env` | Valor Padrão |
-| :--- | :--- | :--- |
-| **URL de Acesso** | - | `http://localhost:3000/login` |
-| **E-mail Mestre** | `MASTER_EMAIL` | `professor@miguettiteam.com` |
-| **Senha Mestre** | `MASTER_PASSWORD` | `miguetti123` |
-| **Perfil** | - | Mestre Alexandre Miguetti (Faixa Preta 5º Dan) |
-
-> 🔒 Qualquer tentativa de acessar rotas protegidas sem autenticação redirecionará automaticamente para `/login?from=<rota>`. Ao autenticar com sucesso, o usuário é direcionado de volta ao destino pretendido.
-
----
 
 ## 🧪 Scripts Disponíveis no `package.json`
 
