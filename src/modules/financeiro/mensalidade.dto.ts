@@ -19,12 +19,41 @@ export const mensalidadeCreateSchema = z.object({
 });
 export type MensalidadeCreateDTO = z.infer<typeof mensalidadeCreateSchema>;
 
+export const mensalidadeUpdateSchema = z.object({
+  valorCents: z.coerce
+    .number()
+    .int('O valor deve ser um inteiro representando centavos.')
+    .positive('O valor deve ser maior que zero.')
+    .optional(),
+  vencimento: z.coerce.date().optional(),
+  competencia: z
+    .string()
+    .regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Competência deve estar no formato YYYY-MM.')
+    .optional(),
+  status: z.enum(['PAGO', 'PENDENTE', 'VENCIDO']).optional(),
+  pagoEm: z.coerce.date().optional().nullable(),
+});
+export type MensalidadeUpdateDTO = z.infer<typeof mensalidadeUpdateSchema>;
+
 export const mensalidadeUpdateStatusSchema = z.object({
   status: z.enum(['PAGO', 'PENDENTE', 'VENCIDO']),
 });
 export type MensalidadeUpdateStatusDTO = z.infer<typeof mensalidadeUpdateStatusSchema>;
 
-/** Lança mensalidades em lote para todos os alunos ativos de uma competência. */
+/** Lança mensalidades em massa para todos os alunos ativos ou selecionados */
+export const mensalidadeEmMassaSchema = z.object({
+  /** Array de IDs específicos ou 'ALL' para todos os ativos */
+  alunoIds: z.array(z.string().uuid()).min(1, 'Selecione ao menos um aluno.').or(z.literal('ALL')),
+  competenciaInicial: z
+    .string()
+    .regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Competência deve estar no formato YYYY-MM.'),
+  diaVencimento: z.coerce.number().int().min(1).max(28).default(10),
+  tipo: z.enum(['UNICA', 'RECORRENTE']).default('UNICA'),
+  quantidadeMeses: z.coerce.number().int().min(1).max(24).default(1),
+});
+export type MensalidadeEmMassaDTO = z.infer<typeof mensalidadeEmMassaSchema>;
+
+/** Lança mensalidades em lote para todos os alunos ativos de uma competência (legado/retrocompatível). */
 export const gerarFolhaSchema = z.object({
   competencia: z
     .string()
@@ -56,9 +85,14 @@ export const cobrancaRequestSchema = z
     apenasInadimplentes: z.boolean().default(true),
     mensagemTemplate: z
       .enum(['LEMBRETE', 'COBRANCA', 'URGENTE'])
+      .optional()
       .default('LEMBRETE'),
+    /** ID do template cadastrado pelo professor */
+    templateId: z.string().uuid().optional(),
+    /** Texto do template dinâmico */
+    templateTexto: z.string().max(2000).optional(),
     /** Mensagem totalmente personalizada pelo professor (sobrepõe o template) */
-    mensagemPersonalizada: z.string().max(600).optional(),
+    mensagemPersonalizada: z.string().max(2000).optional(),
   })
   .refine((v) => Boolean(v.mensalidadeId) || Boolean(v.competencia), {
     message: 'Informe mensalidadeId (individual) ou competencia (em lote).',

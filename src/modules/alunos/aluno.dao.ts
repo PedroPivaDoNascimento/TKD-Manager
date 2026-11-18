@@ -7,7 +7,6 @@ import { AlunoQueryDTO } from './aluno.dto';
  */
 export class AlunoDAO {
   readonly alunoInclude = {
-    captadoPor: { select: { id: true, nome: true } },
     responsavel: true,
   } satisfies Prisma.AlunoInclude;
 

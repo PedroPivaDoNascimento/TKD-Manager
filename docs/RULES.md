@@ -19,7 +19,7 @@
    * **Strategy Pattern:** Utilizado obrigatoriamente para os módulos que possuem múltiplas formas de execução, como o sistema de notificações e cobrança via WhatsApp (`WhatsAppLinkStrategy`, etc.).
 
 2. **Validação de Tipos com DTO e Zod:**
-   * Todas as entradas de dados (formulários, requisições de API) DEVEM possuir um DTO validado por schemas do **Zod** em tempo de execução, incluindo obrigatoriamente o campo de **matrícula** e a referência do responsável pela captação.
+   * Todas as entradas de dados (formulários, requisições de API) DEVEM possuir um DTO validado por schemas do **Zod** em tempo de execução, incluindo obrigatoriamente o campo de **matrícula**.
 
 3. **Regra de Autenticação e Acesso Exclusivo:**
    * O sistema possui **apenas um tipo de usuário autenticado: o Professor / Mestre**. Alunos e responsáveis **não possuem** login, senha ou acesso à plataforma.

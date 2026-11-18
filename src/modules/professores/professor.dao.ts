@@ -6,7 +6,6 @@ export class ProfessorDAO {
   async findAll() {
     return prisma.professor.findMany({
       orderBy: { nome: 'asc' },
-      include: { _count: { select: { alunosCaptados: true } } },
     });
   }
 

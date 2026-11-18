@@ -23,13 +23,9 @@ model Professor {
   /// Hash bcrypt da senha (nunca armazenar senha em texto puro)
   senhaHash     String    @map("senha_hash")
   graduacao     String    @default("Faixa Preta 1º Dan")
-  /// Não-autenticados (ex.: instrutores auxiliares que podem "captar" matrículas)
   ativo         Boolean   @default(true)
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
-
-  alunosCaptados Aluno[]   @relation("AlunoCaptadoPorProfessor")
-  mensalidades   Mensalidade[]
 
   @@map("professores")
 }
@@ -37,10 +33,15 @@ model Professor {
 /// Graduações oficiais de Taekwondo (badges coloridas na UI)
 enum FaixaGraduacao {
   BRANCA
-  AZUL
+  CINZA
   AMARELA
+  LARANJA
   VERDE
+  ROXA
+  AZUL
   MARROM
+  VERMELHA
+  VERMELHA_PONTA_PRETA
   PRETA
 }
 
@@ -74,7 +75,7 @@ model Responsavel {
   @@map("responsaveis")
 }
 
-/// Ficha do aluno: matrícula ÚNICA + rastreio de quem efetuou/pegou a matrícula.
+/// Ficha do aluno: identificador exclusivo de matrícula.
 model Aluno {
   id              String          @id @default(uuid())
   /// Identificador único de matrícula (ex.: MT-2026-0001)
@@ -89,21 +90,15 @@ model Aluno {
   /// Data do último exame de graduação
   dataUltimoExame DateTime?       @map("data_ultimo_exame")
   status          StatusAluno     @default(ATIVO)
-  /// Nome livre de quem captou a matrícula (quando não é um professor cadastrado)
-  captadoPorNome  String?         @map("captado_por_nome")
-  /// Vinculação opcional ao cadastro de professores (rastreio analítico)
-  captadoPorId    String?         @map("captado_por_id")
   /// Vínculo obrigatório (via Service) se o aluno for menor de 18 anos
   responsavelId   String?         @map("responsavel_id")
   valorMensalidadeCents Int       @default(15000) @map("valor_mensalidade_cents")
   createdAt       DateTime        @default(now()) @map("created_at")
   updatedAt       DateTime        @updatedAt @map("updated_at")
 
-  captadoPor      Professor?      @relation("AlunoCaptadoPorProfessor", fields: [captadoPorId], references: [id])
   responsavel     Responsavel?    @relation(fields: [responsavelId], references: [id])
   mensalidades    Mensalidade[]
 
-  @@index([captadoPorId])
   @@index([status])
   @@map("alunos")
 }
@@ -112,7 +107,6 @@ model Aluno {
 model Mensalidade {
   id           String             @id @default(uuid())
   alunoId      String             @map("aluno_id")
-  professorId  String?            @map("professor_id")
   /// Referência do período no formato YYYY-MM
   competencia  String             @map("competencia")
   valorCents   Int                @map("valor_cents")
@@ -123,10 +117,22 @@ model Mensalidade {
   updatedAt    DateTime           @updatedAt @map("updated_at")
 
   aluno        Aluno              @relation(fields: [alunoId], references: [id], onDelete: Cascade)
-  professor    Professor?         @relation(fields: [professorId], references: [id])
 
-  @@unique([alunoId, competencia])
+  @@index([alunoId])
+  @@index([competencia])
   @@index([status])
   @@index([vencimento])
   @@map("mensalidades")
+}
+
+/// Templates de mensagens padrão de WhatsApp para cobrança assistida
+model MensagemTemplate {
+  id        String   @id @default(uuid())
+  titulo    String
+  corpo     String   @db.Text
+  isDefault Boolean  @default(false) @map("is_default")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("mensagem_templates")
 }
