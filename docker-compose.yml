@@ -36,13 +36,9 @@ services:
     container_name: tkd-manager-app
     profiles: ['production']
     restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
+    env_file:
+      - .env
     environment:
-      DATABASE_URL: postgresql://tkd:tkd_secret@postgres:5432/tkd_manager?schema=public
-      JWT_SECRET: ${JWT_SECRET:-troque-este-segredo-em-producao}
-      SEED_DEFAULT_PASSWORD: ${SEED_DEFAULT_PASSWORD:-miguetti123}
       NODE_ENV: production
     ports:
       - '3000:3000'
