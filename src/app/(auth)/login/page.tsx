@@ -10,8 +10,8 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const fromParam = searchParams.get('from');
 
-  const [email, setEmail] = useState('professor@miguettiteam.com');
-  const [senha, setSenha] = useState('miguetti123');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -90,7 +90,7 @@ function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="professor@miguettiteam.com"
+                placeholder="email@dominio.com"
                 className="w-full pl-10 pr-3 py-2.5 bg-[#27272a] border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-miguetti-red focus:border-transparent transition-all text-sm"
               />
             </div>
