@@ -26,6 +26,6 @@
 ---
 
 ## 3. Componentes do Dashboard Analítico
-* **Cards de Indicadores (KPIs):** Exibição em destaque do total geral de alunos ativos.
-* **Tabela e Gráfico de Matrículas:** Componentes visuais limpos exibindo quem foi o responsável por captar cada matrícula, permitindo ao professor auditar o volume de conversão de forma prática.
+* **Cards de Indicadores (KPIs):** Exibição em destaque do total geral de alunos, alunos ativos/inativos, arrecadação financeira confirmada e mensalidades em atraso.
+* **Distribuição de Faixas:** Painel de badges visuais com as cores oficiais de Taekwondo exibindo o quantitativo de praticantes em cada graduação.
 * **Badges de Graduação:** Cores correspondentes às faixas de Taekwondo para identificação rápida nas tabelas de alunos.

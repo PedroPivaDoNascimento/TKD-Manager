@@ -1,0 +1,138 @@
+// =============================================================================
+// TKD Manager - Modelagem de Dados (Prisma ORM + PostgreSQL)
+// Padrões: valores monetários SEMPRE em Int (centavos). Acesso exclusivo do
+// Professor; Alunos e Responsáveis NÃO possuem login.
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Perfil único autenticado do sistema (Professor / Mestre - Sabomim).
+/// Alunos e responsáveis NÃO possuem credenciais de acesso.
+model Professor {
+  id            String    @id @default(uuid())
+  nome          String
+  /// Campo de login exclusivo do sistema
+  email         String    @unique
+  /// Hash bcrypt da senha (nunca armazenar senha em texto puro)
+  senhaHash     String    @map("senha_hash")
+  graduacao     String    @default("Faixa Preta 1º Dan")
+  ativo         Boolean   @default(true)
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("professores")
+}
+
+/// Graduações oficiais de Taekwondo (badges coloridas na UI)
+enum FaixaGraduacao {
+  BRANCA
+  CINZA
+  AMARELA
+  LARANJA
+  VERDE
+  ROXA
+  AZUL
+  MARROM
+  VERMELHA
+  VERMELHA_PONTA_PRETA
+  PRETA
+}
+
+/// Status financeiro da mensalidade (regra: valor em centavos, sem float).
+enum StatusMensalidade {
+  PAGO
+  PENDENTE
+  VENCIDO
+}
+
+/// Status geral do vínculo do aluno com a academia.
+enum StatusAluno {
+  ATIVO
+  INATIVO
+}
+
+/// Responsável legal (pai/mãe/tutor) — usado quando o aluno é MENOR de idade.
+/// Os dados de cobrança são direcionados ao responsável neste caso.
+model Responsavel {
+  id           String   @id @default(uuid())
+  nome         String
+  cpf          String?
+  /// Telefone alvo do WhatsApp (formato E.164 somente dígitos, ex.: 5511999998888)
+  telefone     String
+  parentesco   String   @default("Responsável Legal")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  alunos       Aluno[]
+
+  @@map("responsaveis")
+}
+
+/// Ficha do aluno: identificador exclusivo de matrícula.
+model Aluno {
+  id              String          @id @default(uuid())
+  /// Identificador único de matrícula (ex.: MT-2026-0001)
+  matricula       String          @unique
+  nome            String
+  dataNascimento  DateTime        @map("data_nascimento")
+  sexo            String?
+  telefone        String?
+  email           String?
+  endereco        String?
+  faixaAtual      FaixaGraduacao  @default(BRANCA) @map("faixa_atual")
+  /// Data do último exame de graduação
+  dataUltimoExame DateTime?       @map("data_ultimo_exame")
+  status          StatusAluno     @default(ATIVO)
+  /// Vínculo obrigatório (via Service) se o aluno for menor de 18 anos
+  responsavelId   String?         @map("responsavel_id")
+  valorMensalidadeCents Int       @default(15000) @map("valor_mensalidade_cents")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  responsavel     Responsavel?    @relation(fields: [responsavelId], references: [id])
+  mensalidades    Mensalidade[]
+
+  @@index([status])
+  @@map("alunos")
+}
+
+/// Lançamento financeiro de mensalidade. VALOR SEMPRE EM CENTAVOS (Int).
+model Mensalidade {
+  id           String             @id @default(uuid())
+  alunoId      String             @map("aluno_id")
+  /// Referência do período no formato YYYY-MM
+  competencia  String             @map("competencia")
+  valorCents   Int                @map("valor_cents")
+  vencimento   DateTime           @map("vencimento")
+  status       StatusMensalidade  @default(PENDENTE)
+  pagoEm       DateTime?          @map("pago_em")
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+
+  aluno        Aluno              @relation(fields: [alunoId], references: [id], onDelete: Cascade)
+
+  @@index([alunoId])
+  @@index([competencia])
+  @@index([status])
+  @@index([vencimento])
+  @@map("mensalidades")
+}
+
+/// Templates de mensagens padrão de WhatsApp para cobrança assistida
+model MensagemTemplate {
+  id        String   @id @default(uuid())
+  titulo    String
+  corpo     String   @db.Text
+  isDefault Boolean  @default(false) @map("is_default")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("mensagem_templates")
+}

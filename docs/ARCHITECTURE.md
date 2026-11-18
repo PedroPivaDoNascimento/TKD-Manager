@@ -16,10 +16,10 @@ src/
 └── modules/                    # NÚCLEO DA APLICAÇÃO (Domain & Business Logic)
     ├── auth/                   # Módulo de autenticação
     ├── alunos/
-    │   ├── aluno.dto.ts        # Schemas Zod (inclui validação de matricula e registeredBy)
-    │   ├── aluno.dao.ts        # DAO (Prisma Client queries + agregações para gráficos)
-    │   └── aluno.service.ts    # Regras de negócio de alunos
-    ├── dashboard/              # Módulo de métricas para tabelas e gráficos
+    │   ├── aluno.dto.ts        # Schemas Zod (validação de matricula única e dados cadastrais)
+    │   ├── aluno.dao.ts        # DAO (Prisma Client queries de alunos e responsáveis)
+    │   └── aluno.service.ts    # Regras de negócio de alunos (menor de idade, primeira mensalidade)
+    ├── dashboard/              # Módulo de métricas do painel
     │   ├── dashboard.dao.ts
     │   └── dashboard.service.ts
     ├── professores/
@@ -35,4 +35,4 @@ src/
 
 ## 2. Modelagem de Dados Chave (Prisma / PostgreSQL)
 
-Tabela Alunos: Deve conter obrigatoriamente a coluna matricula (String, Unique) e a coluna registered_by (ou captado_por), permitindo alimentar as consultas de agregação para a tabela e o gráfico de total de alunos por responsável de matrícula.
+Tabela Alunos: Deve conter obrigatoriamente a coluna `matricula` (String, Unique), vínculo com responsável legal (para alunos menores de 18 anos) e controle de mensalidade padrão em centavos. Acesso restrito ao perfil único de Professor Mestre.
